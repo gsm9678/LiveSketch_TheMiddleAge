@@ -32,7 +32,7 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 
         if (_instance == null)
         {
-            GameObject gameObject = new GameObject();
+            GameObject gameObject = new();
             gameObject.name = typeof(T).Name;
             _instance = gameObject.AddComponent<T>();
             DontDestroyOnLoad(gameObject);
