@@ -119,6 +119,57 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &342691992
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 342691994}
+  - component: {fileID: 342691993}
+  m_Layer: 0
+  m_Name: CharacterSelecter
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &342691993
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 342691992}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d086a1a411d693e48b1cd8800d4c343e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterSelecter
+  Characters:
+  - id: Male Peasant1
+    Prefab: {fileID: 8803311989544803837, guid: 09dc77b567b36814a9f1e58843ee8ea4, type: 3}
+  - id: Male Peasant2
+    Prefab: {fileID: 1863652075701507573, guid: a3716edd7cd86b446bda8f9fc36c9f32, type: 3}
+  - id: Male Peasant3
+    Prefab: {fileID: 2172321074600270556, guid: 06bdf48ee89b5b54b939f590eac67be3, type: 3}
+--- !u!4 &342691994
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 342691992}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &672751653
 GameObject:
   m_ObjectHideFlags: 0
@@ -148,12 +199,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e401dacb908cc5d4f8eb5de14593ecd6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::QrFolderWatcher
-  folderPath: C:\\Users\\user\\Documents\\LiveSketchScanFolder
+  folderPath: "C:\\Users\\gsm96\\OneDrive\\\uBB38\uC11C\\LiveSketchScanFolder"
   allowedExt:
   - .png
   - .jpg
   - .jpeg
   pollingIntervalSeconds: 1
+  characterSelecter: {fileID: 342691993}
 --- !u!4 &672751655
 Transform:
   m_ObjectHideFlags: 0
@@ -358,56 +410,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1275372582
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1275372584}
-  - component: {fileID: 1275372583}
-  m_Layer: 0
-  m_Name: QRCropper
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1275372583
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1275372582}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2e7f7e89d6da3194987a3b0a7fec0e82, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::QRCropper
-  source: {fileID: 2800000, guid: 6c0c97f8666aaad4c91d5ba6a8c6220f, type: 3}
-  outputWidth: 1448
-  outputHeight: 2048
-  cropMargin: 0.04
-  unwarpedA4: {fileID: 0}
-  croppedInside: {fileID: 0}
---- !u!4 &1275372584
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1275372582}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -6.84617, y: 0, z: -8.08531}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -415,4 +417,4 @@ SceneRoots:
   - {fileID: 963194228}
   - {fileID: 705507995}
   - {fileID: 672751655}
-  - {fileID: 1275372584}
+  - {fileID: 342691994}

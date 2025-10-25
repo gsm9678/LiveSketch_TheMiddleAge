@@ -230,6 +230,7 @@ public class QrFolderWatcher : MonoBehaviour
             if (result != null)
             {
                 Debug.Log($"[QR] ÆÄÀÏ: {Path.GetFileName(path)} / °ª: {result.Text}");
+                GameManager.Instance.OnQRDataDetected?.Invoke(result.Text);
             }
             else
             {
