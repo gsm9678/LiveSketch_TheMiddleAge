@@ -3,18 +3,23 @@ using UnityEngine;
 public class CharacterSelecter : MonoBehaviour
 {
     [Header("생성할 캐릭터 설정")]
-    [SerializeField] Character[] Characters;
+    [SerializeField] CharacterData[] Characters;
 
     private void Start()
     {
         GameManager.Instance.OnQRDataDetected += GenerateCharacter;
     }
 
+    private void OnDestroy()
+    {
+        GameManager.Instance.OnQRDataDetected -= GenerateCharacter;
+    }
+
     public void GenerateCharacter(string id)
     {
         GameObject go = null;
 
-        foreach (Character character in Characters)
+        foreach (CharacterData character in Characters)
         {
             if(character.id == id)
             {

@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
-public struct Character
+public struct CharacterData
 {
     public string id;
     public GameObject Prefab;
 }
 
+#region Sensor
 public class SensorDataFormat
 {
     public Vector2 RectSize;
@@ -23,3 +24,4 @@ public enum SensorEnum
     Left,
     Down
 }
+#endregion
