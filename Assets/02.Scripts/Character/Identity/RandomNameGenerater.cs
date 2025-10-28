@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace RandomName
+namespace RandomCharacterData
 {
     public static class RandomNameGenerator
     {
