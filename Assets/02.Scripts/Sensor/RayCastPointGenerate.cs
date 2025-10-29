@@ -18,7 +18,7 @@ public class RayCastPointGenerate : MonoBehaviour
     {
         if (SensorActiveState.instance.SensorState[((int)sensorEnum)])//호쿠요 메니저가 연결되었으면
         {
-            List<Vector3> points = sensorManager.getSensorVector();
+            List<Vector3> points = sensorManager.GetSensorVector();
             origins = new Vector3[points.Count];
             directions = new Vector3[points.Count];
 

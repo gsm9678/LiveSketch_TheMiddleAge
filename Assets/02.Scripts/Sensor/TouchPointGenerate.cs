@@ -20,25 +20,25 @@ public class TouchPointGenerate : MonoBehaviour
         {
             if(TouchPoint != null)
             {
-                if(sensorManager.getSensorVector().Count > TouchPoints.Count)//오브젝트 풀링
+                if(sensorManager.GetSensorVector().Count > TouchPoints.Count)//오브젝트 풀링
                 {
-                    for (int i = TouchPoints.Count; i < sensorManager.getSensorVector().Count; i++)
+                    for (int i = TouchPoints.Count; i < sensorManager.GetSensorVector().Count; i++)
                     {
                         TouchPoints.Add(Instantiate(TouchPoint, TouchPointBasket));
                     }
                 }
-                else if(sensorManager.getSensorVector().Count < TouchPoints.Count)//오브젝트 풀링
+                else if(sensorManager.GetSensorVector().Count < TouchPoints.Count)//오브젝트 풀링
                 {
-                    for(int i = sensorManager.getSensorVector().Count; i < TouchPoints.Count; i++)
+                    for(int i = sensorManager.GetSensorVector().Count; i < TouchPoints.Count; i++)
                     {
                         TouchPoints[i].SetActive(false);
                     }
                 }
 
-                for(int i = 0; i < sensorManager.getSensorVector().Count; i++)//오브젝트 풀링, 센서 위치에 이동
+                for(int i = 0; i < sensorManager.GetSensorVector().Count; i++)//오브젝트 풀링, 센서 위치에 이동
                 {
                     TouchPoints[i].SetActive(true);
-                    TouchPoints[i].transform.localPosition = sensorManager.getSensorVector()[i];
+                    TouchPoints[i].transform.localPosition = sensorManager.GetSensorVector()[i];
                 }
             }
         }

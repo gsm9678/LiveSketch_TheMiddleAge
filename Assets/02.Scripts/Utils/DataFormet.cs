@@ -12,15 +12,7 @@ public struct CharacterData
 #region Personality
 public enum Situation { OneSelf, Hello, Game }
 
-public enum Personality { HappyPerson, AngryPerson, SadPerson, TiredPerson, FearPerson }
-
-[Serializable]
-public class Dialogue
-{
-    public Situation situations;
-
-    public string[] _dialoue;
-}
+public enum PersonalityEnum { HappyPerson, AngryPerson, SadPerson, TiredPerson, FearPerson }
 #endregion
 
 #region Sensor

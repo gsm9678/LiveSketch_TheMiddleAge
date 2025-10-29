@@ -13,13 +13,15 @@ MonoBehaviour:
   m_Name: PeronalityDialogue 1
   m_EditorClassIdentifier: Assembly-CSharp::PeronalityDialogue
   _personality: 0
-  _dialogues:
-  - situations: 0
-    _dialoue:
-    - "\uB108\uBB34 \uC990\uAC70\uC6CC!!"
-    - "\uC548\uB155~~~"
-  - situations: 1
-    _dialoue:
-    - "\uC548\uB155! \uB098\uB294 'NAME'\uC774\uB77C\uACE0 \uD574! \uBC18\uAC00\uC6CC~"
-  - situations: 2
-    _dialoue: []
+  _talkDatas:
+    _serializedList:
+    - Key: 1
+      Value:
+      - "\uC548\uB155! \uB09C \uACF5\uC2B9\uBBFC\uC774\uC57C"
+    - Key: 0
+      Value:
+      - "\uC9D1\uC5D0 \uAC00\uACE0 \uC2F6\uC5B4\u3160\u3160"
+      - "\uCF5C\uB77C\uAC00 \uB9C8\uC2DC\uACE0 \uC2F6\uB124"
+    - Key: 2
+      Value:
+      - "\uAC00\uC704\uBC14\uC704\uBCF4 \uD558\uC790!"

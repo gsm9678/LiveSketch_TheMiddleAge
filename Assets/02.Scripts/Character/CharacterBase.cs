@@ -2,10 +2,10 @@ using System;
 using UnityEngine;
 using RandomCharacterData;
 
-abstract class Identity : MonoBehaviour
+abstract public class CharacterBase : MonoBehaviour
 {
     [SerializeField] string _name = null;
-    [SerializeField] PersonalityDialogue _personality = null;
+    [SerializeField] PersonalityData _personality = null;
 
     private void Start()
     {
@@ -18,5 +18,4 @@ abstract class Identity : MonoBehaviour
             _personality = RandomPersonality.GetRandomPersonality();
         }
     }
-
 }
