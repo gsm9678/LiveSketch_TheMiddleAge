@@ -5,7 +5,7 @@ using RandomCharacterData;
 abstract public class CharacterBase : MonoBehaviour
 {
     [SerializeField] string _name = null;
-    [SerializeField] PersonalityData _personality = null;
+    [SerializeField] CharacterActData _characterActData = null;
 
     private void Start()
     {
@@ -13,9 +13,9 @@ abstract public class CharacterBase : MonoBehaviour
         {
             _name = RandomNameGenerator.GenerateRandomName();
         }
-        if(_personality == null)
+        if(_characterActData == null)
         {
-            _personality = RandomPersonality.GetRandomPersonality();
+            _characterActData = RandomCharacterActData.GetRandomCharacterActData();
         }
     }
 }
