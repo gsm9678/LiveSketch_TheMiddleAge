@@ -358,7 +358,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2172321074600270556, guid: 06bdf48ee89b5b54b939f590eac67be3, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1145950117}
   m_SourcePrefab: {fileID: 100100000, guid: 06bdf48ee89b5b54b939f590eac67be3, type: 3}
 --- !u!1 &159231895
 GameObject:
@@ -866,6 +869,25 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1145950114 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2172321074600270556, guid: 06bdf48ee89b5b54b939f590eac67be3, type: 3}
+  m_PrefabInstance: {fileID: 127063114}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1145950117
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1145950114}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b9d108eea2396e3409bb965ccdbde9e8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Character
+  characterName: 
+  characterActData: {fileID: 0}
 --- !u!1 &1184344846
 GameObject:
   m_ObjectHideFlags: 0
@@ -969,6 +991,25 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1495731102 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8803311989544803837, guid: 09dc77b567b36814a9f1e58843ee8ea4, type: 3}
+  m_PrefabInstance: {fileID: 2060575652}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1495731105
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1495731102}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b9d108eea2396e3409bb965ccdbde9e8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Character
+  characterName: 
+  characterActData: {fileID: 0}
 --- !u!1 &1524640644
 GameObject:
   m_ObjectHideFlags: 0
@@ -980,7 +1021,7 @@ GameObject:
   - component: {fileID: 1524640646}
   - component: {fileID: 1524640645}
   m_Layer: 0
-  m_Name: UsePesrnalityData
+  m_Name: UseCharacterActData
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -998,7 +1039,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fcb4d6d7d43f4c04592801f637282e3c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UsePesrnalityDialogue
-  personalityDatas:
+  CharacterActDataDatas:
   - {fileID: 11400000, guid: a34bdfdbaca5ced499359eea4b02e1bf, type: 2}
   - {fileID: 11400000, guid: 39388454a0c833340801e89264a2dbd8, type: 2}
 --- !u!4 &1524640646
@@ -1033,8 +1074,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b9d108eea2396e3409bb965ccdbde9e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Character
-  _name: "\uACF5\uC2B9\uBBFC"
-  _personality: {fileID: 0}
+  characterName: 
+  characterActData: {fileID: 0}
 --- !u!1 &1749344123
 GameObject:
   m_ObjectHideFlags: 0
@@ -1475,7 +1516,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8803311989544803837, guid: 09dc77b567b36814a9f1e58843ee8ea4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1495731105}
   m_SourcePrefab: {fileID: 100100000, guid: 09dc77b567b36814a9f1e58843ee8ea4, type: 3}
 --- !u!4 &4315726745626723105
 Transform:

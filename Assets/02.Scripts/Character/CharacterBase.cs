@@ -2,20 +2,32 @@ using System;
 using UnityEngine;
 using RandomCharacterData;
 
-abstract public class CharacterBase : MonoBehaviour
+public abstract class CharacterBase : MonoBehaviour
 {
-    [SerializeField] string _name = null;
-    [SerializeField] CharacterActData _characterActData = null;
+    public string characterName = null;
+    public CharacterActData characterActData = null;
 
     private void Start()
     {
-        if (_name == "")
+        if (characterName == "")
         {
-            _name = RandomNameGenerator.GenerateRandomName();
+            characterName = RandomNameGenerator.GenerateRandomName();
         }
-        if(_characterActData == null)
+        if(characterActData == null)
         {
-            _characterActData = RandomCharacterActData.GetRandomCharacterActData();
+            characterActData = RandomCharacterActData.GetRandomCharacterActData();
         }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        TriggerEvent();
+    }
+
+    protected abstract void TriggerEvent();
+
+    protected string GetDialogue(Situation situation, int DialogueIndex)
+    {
+        return characterActData.DialogueDatas[situation][DialogueIndex];
     }
 }
