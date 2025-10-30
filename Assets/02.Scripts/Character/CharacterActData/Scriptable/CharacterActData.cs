@@ -5,7 +5,7 @@ using AYellowpaper.SerializedCollections;
 public class CharacterActData : ScriptableObject
 {
     [SerializeField][SerializedDictionary("Situation", "Stripts")]
-    private SerializedDictionary<Situation, string[]> _talkDatas;
-    public SerializedDictionary<Situation, string[]> TalkDatas { get { return _talkDatas; } }
+    private SerializedDictionary<Situation, string[]> _dialogueDatas;
+    public SerializedDictionary<Situation, string[]> DialogueDatas { get { return _dialogueDatas; } }
 
 }
