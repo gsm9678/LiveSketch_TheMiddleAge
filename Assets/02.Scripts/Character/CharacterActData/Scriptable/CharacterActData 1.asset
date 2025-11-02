@@ -12,9 +12,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a117e2139a48544aa6e40b282e85cea, type: 3}
   m_Name: CharacterActData 1
   m_EditorClassIdentifier: Assembly-CSharp::PeronalityDialogue
-  _personality: 0
-  talkData:
-  - situations: 0
-    _Talk: []
-  - situations: 0
-    _Talk: []
+  _dialogueDatas:
+    _serializedList:
+    - Key: 1
+      Value:
+      - "\uC548\uB155! \uB0B4 \uC774\uB984\uC740 (MyName)\uC774\uB77C\uACE0 \uD574!
+        \\n\uBC18\uB098\uC11C \uBC18\uAC00\uC6CC!"
+    - Key: 2
+      Value:
+      - A
+      - B
+      - C
+      - D
+      - E
+    - Key: 3
+      Value:
+      - F
+      - G
+      - H
+      - I
+      - J
