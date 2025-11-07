@@ -9,11 +9,14 @@ public struct CharacterData
     public GameObject Prefab;
 }
 
+public enum Situation { OneSelf, Hello, Talk1, Talk2 }
+public enum TalkSituation { Talk1 = Situation.Talk1, Talk2 = Situation.Talk2 }
+
 #region Sensor
 public class SensorDataFormat
 {
     public Vector2 RectSize;
-    public List<Vector3> Position = new List<Vector3>();
+    public List<Vector3> Position = new();
 }
 
 public enum SensorEnum
