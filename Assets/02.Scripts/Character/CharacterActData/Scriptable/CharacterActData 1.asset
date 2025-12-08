@@ -20,15 +20,15 @@ MonoBehaviour:
         \\n\uBC18\uB098\uC11C \uBC18\uAC00\uC6CC!"
     - Key: 2
       Value:
-      - A
-      - B
-      - C
-      - D
-      - E
+      - "\uBC25 \uBA39\uC5C8\uC5B4?"
+      - "\uC751 \uBA39\uC5C8\uC5B4! \uB108\uB294?"
+      - "\uB098\uB3C4 \uBA39\uC5C8\uC5B4 "
+      - "\uB098\uC911\uC5D0 \uBCF4\uC790!"
+      - "\uC5C9 \uB098\uC911\uC5D0!"
     - Key: 3
       Value:
-      - F
-      - G
-      - H
-      - I
-      - J
+      - "\uC694\uC998 \uBB50\uD558\uACE0 \uC9C0\uB0B4?"
+      - "\uC694\uC998 \uACF5\uBD80\uD558\uACE0 \uC788\uC5B4 \uB108\uB294?"
+      - "\uB098\uB294 \uC6B4\uB3D9\uD558\uACE0 \uC788\uC5B4 \uB108\uB3C4 \uAC19\uC774
+        \uD560\uB798?"
+      - "\uC74C \uC870\uAE08 \uC0DD\uAC01\uD574 \uBCFC\uAC8C"
