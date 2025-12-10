@@ -31,6 +31,12 @@ public class Movement3D : MonoBehaviour
         StartCoroutine("OnMove");
     }
 
+    public void ResetMoveTo()
+    {
+        navMeshAgent.ResetPath();
+        StopCoroutine("OnMove");
+    }
+
     IEnumerator OnMove()
     {
         while (true)

@@ -7,6 +7,10 @@ public class Character : MonoBehaviour
     public string characterName = null;
     public CharacterActData characterActData = null;
     public float CharacterPriority = 0;
+    [SerializeField] float EventDelay;
+    private float deltaTime = 0;
+
+    [SerializeField] private PlayerController playerController;
 
     private bool is_call = false;
 
@@ -20,18 +24,34 @@ public class Character : MonoBehaviour
         {
             characterActData = RandomCharacterActData.GetRandomCharacterActData();
         }
+        if(playerController == null)
+        {
+            playerController = gameObject.AddComponent<PlayerController>();
+        }
         Debug.Log(GetDialogue(Situation.Hello, 0));
 
         CharacterPriority = Random.Range(0f, 100f);
+        deltaTime = EventDelay;
+    }
+
+    private void Update()
+    {
+        if (deltaTime < EventDelay)
+        {
+            deltaTime += Time.deltaTime;
+        }
     }
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Character"))
         {
-            if (CharacterPriority > other.GetComponent<Character>().CharacterPriority)
+            if (!is_call && deltaTime >= EventDelay)
             {
-                if (!is_call)
+                deltaTime = 0;
+                playerController.StartEvent();
+
+                if (CharacterPriority > other.GetComponent<Character>().CharacterPriority)
                 {
                     StartCoroutine(StartTalking(other.GetComponent<Character>()));
                 }
@@ -55,6 +75,8 @@ public class Character : MonoBehaviour
 
         CharacterPriority = Random.Range(0f, 100f);
 
+        playerController.StartMoveTo();
+        partner.playerController.StartMoveTo();
         yield return null;
     }
 
@@ -64,6 +86,8 @@ public class Character : MonoBehaviour
         if (DialogueIndex >= lines.Length) yield break;
 
         Debug.Log(characterName + "\n" + GetDialogue(situation, DialogueIndex, partnerName));
+
+        yield return new WaitForSeconds(1f);
 
         DialogueIndex++;
 

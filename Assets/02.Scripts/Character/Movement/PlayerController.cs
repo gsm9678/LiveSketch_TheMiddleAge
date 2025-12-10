@@ -15,6 +15,11 @@ public class PlayerController : MonoBehaviour
         targetPos = GetComponent<Transform>();
     }
 
+    private void Start()
+    {
+        StartMoveTo();
+    }
+
     private void Update()
     {
         // 마우스 왼쪽 버튼을 눌렀을 때
@@ -27,6 +32,21 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
+
+    public void StartMoveTo()
+    {
+        if (RandomPoint(targetPos.position, range, out point))
+        {
+            movement3D.MoveTo(point);
+            //targetPos.position = point;
+        }
+    }
+
+    public void StartEvent()
+    {
+        movement3D.ResetMoveTo();
+    }
+
     bool RandomPoint(Vector3 center, float range, out Vector3 result)
     {
         while (true)
