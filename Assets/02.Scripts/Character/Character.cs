@@ -40,7 +40,12 @@ public class Character : MonoBehaviour
         {
             deltaTime += Time.deltaTime;
         }
+        else if(playerController.action == null)
+        {
+            //playerController.action += 
+        }
     }
+    //public void 
 
     private void OnTriggerEnter(Collider other)
     {
@@ -49,7 +54,7 @@ public class Character : MonoBehaviour
             if (!is_call && deltaTime >= EventDelay)
             {
                 deltaTime = 0;
-                playerController.StartEvent();
+                playerController.ResetMoveTo();
 
                 if (CharacterPriority > other.GetComponent<Character>().CharacterPriority)
                 {
@@ -75,8 +80,8 @@ public class Character : MonoBehaviour
 
         CharacterPriority = Random.Range(0f, 100f);
 
-        playerController.StartMoveTo();
-        partner.playerController.StartMoveTo();
+        playerController.MoveTo();
+        partner.playerController.MoveTo();
         yield return null;
     }
 

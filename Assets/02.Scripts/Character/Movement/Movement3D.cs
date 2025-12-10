@@ -1,8 +1,6 @@
 using System.Collections;
-using System.Drawing;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.UI;
 
 public class Movement3D : MonoBehaviour
 {
@@ -19,14 +17,17 @@ public class Movement3D : MonoBehaviour
         targetPos = GetComponent<Transform>();
     }
 
-    public void MoveTo(Vector3 goalPosition)
+    public void MoveTo()
     {
         // 기존에 이동 행동을 하고 있었다면 코루틴 중지
         StopCoroutine("OnMove");
         // 이동 속도 설정
         navMeshAgent.speed = moveSpeed;
         // 목표지점 설정 (목표까지의 경로 계산 후 알아서 움직인다)
-        navMeshAgent.SetDestination(goalPosition);
+        if (RandomPoint(targetPos.position, range, out point))
+        {
+            navMeshAgent.SetDestination(point);
+        }
         // 이동 행동에 대한 코루틴 시작
         StartCoroutine("OnMove");
     }
@@ -48,12 +49,10 @@ public class Movement3D : MonoBehaviour
                 // 내 위치를 목표 위치로 설정
                 transform.position = navMeshAgent.destination;
                 // SetDestination()에 의해 설정된 경로를 초기화. 이동을 멈춘다
-                navMeshAgent.ResetPath(); 
-                if (RandomPoint(targetPos.position, range, out point))
-                {
-                    MoveTo(point);
-                    //targetPos.position = point;
-                }
+                navMeshAgent.ResetPath();
+
+                MoveTo();
+
                 break;
             }
 
@@ -70,7 +69,6 @@ public class Movement3D : MonoBehaviour
             if (NavMesh.SamplePosition(randomPoint, out hit, 1.0f, NavMesh.AllAreas))
             {
                 result = hit.position; 
-                MoveTo(result);
                 return true;
             }
         }
