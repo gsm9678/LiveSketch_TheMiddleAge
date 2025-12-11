@@ -14,6 +14,10 @@ public class Character : MonoBehaviour
 
     private bool is_call = false;
 
+    // 말풍선 참조
+    private SpeechBubble myBubble;
+    private SpeechBubble partnerBubble;
+
     private void Start()
     {
         if (characterName == "")
@@ -24,7 +28,7 @@ public class Character : MonoBehaviour
         {
             characterActData = RandomCharacterActData.GetRandomCharacterActData();
         }
-        if(playerController == null)
+        if (playerController == null)
         {
             playerController = gameObject.AddComponent<PlayerController>();
         }
@@ -32,6 +36,8 @@ public class Character : MonoBehaviour
 
         CharacterPriority = Random.Range(0f, 100f);
         deltaTime = EventDelay;
+
+        playerController.action += OnArrivedToDestination;
     }
 
     private void Update()
@@ -40,12 +46,17 @@ public class Character : MonoBehaviour
         {
             deltaTime += Time.deltaTime;
         }
-        else if(playerController.action == null)
+    }
+
+    private void OnArrivedToDestination()
+    {
+        if (deltaTime >= EventDelay)
         {
-            //playerController.action += 
+            Debug.Log($"{characterName} :: EventDelay 이후 랜덤 목적지에 도착했습니다!");
+            deltaTime = 0;
+            playerController.MoveTo();
         }
     }
-    //public void 
 
     private void OnTriggerEnter(Collider other)
     {
@@ -56,15 +67,18 @@ public class Character : MonoBehaviour
                 deltaTime = 0;
                 playerController.ResetMoveTo();
 
-                if (CharacterPriority > other.GetComponent<Character>().CharacterPriority)
+                Character otherChar = other.GetComponent<Character>();
+
+                if (otherChar != null &&
+                    CharacterPriority > otherChar.CharacterPriority)
                 {
-                    StartCoroutine(StartTalking(other.GetComponent<Character>()));
+                    StartCoroutine(StartTalking(otherChar));
                 }
             }
         }
     }
 
-
+    //  여기서부터 말풍선 + 대화 시작
     public IEnumerator StartTalking(Character partner)
     {
         var values = System.Enum.GetValues(typeof(TalkSituation));
@@ -74,29 +88,82 @@ public class Character : MonoBehaviour
 
         is_call = true;
 
-        yield return(Talking(situation, 0, partner, partner.characterName));
+        // 양쪽 캐릭터에 말풍선 생성
+        myBubble = BubbleManager.Instance.CreateBubble(transform);
+        partnerBubble = BubbleManager.Instance.CreateBubble(partner.transform);
 
+        yield return Talking(situation, 0, partner, partner.characterName);
+
+        // 대화 종료 처리
         is_call = false;
-
         CharacterPriority = Random.Range(0f, 100f);
+
+        if (myBubble != null) Destroy(myBubble.gameObject);
+        if (partnerBubble != null) Destroy(partnerBubble.gameObject);
 
         playerController.MoveTo();
         partner.playerController.MoveTo();
         yield return null;
     }
 
+    /// <summary>
+    /// 재귀적으로 주고받는 대화 코루틴
+    /// </summary>
     private IEnumerator Talking(Situation situation, int DialogueIndex, Character partner, string partnerName)
     {
         var lines = characterActData.DialogueDatas[situation];
         if (DialogueIndex >= lines.Length) yield break;
 
-        Debug.Log(characterName + "\n" + GetDialogue(situation, DialogueIndex, partnerName));
+        // 내 대사
+        string msg = GetDialogue(situation, DialogueIndex, partnerName);
+        Debug.Log(characterName + "\n" + msg);
 
-        yield return new WaitForSeconds(1f);
+        if (myBubble != null)
+        {
+            // Text Animator 3.x 타입라이터로 말풍선 출력
+            yield return myBubble.PlayText(msg, 0.3f);
+        }
+        else
+        {
+            // 말풍선이 없으면 기존처럼 딜레이만 유지
+            yield return new WaitForSeconds(1f);
+        }
 
         DialogueIndex++;
 
-        yield return(partner.Talking(situation, DialogueIndex, this, characterName));
+        // 상대 캐릭터에게 턴 넘기기
+        if (partner != null)
+        {
+            yield return partner.PartnerTalking(situation, DialogueIndex, this, characterName);
+        }
+    }
+
+    /// <summary>
+    /// 상대 캐릭터가 말하는 쪽 (같은 패턴, 말풍선만 partnerBubble 사용)
+    /// </summary>
+    public IEnumerator PartnerTalking(Situation situation, int DialogueIndex, Character partner, string partnerName)
+    {
+        var lines = characterActData.DialogueDatas[situation];
+        if (DialogueIndex >= lines.Length) yield break;
+
+        string msg = GetDialogue(situation, DialogueIndex, partnerName);
+        Debug.Log(characterName + "\n" + msg);
+
+        if (partnerBubble != null)
+        {
+            yield return partnerBubble.PlayText(msg, 0.3f);
+        }
+        else
+        {
+            yield return new WaitForSeconds(1f);
+        }
+
+        DialogueIndex++;
+
+        if (partner != null)
+        {
+            yield return partner.Talking(situation, DialogueIndex, this, characterName);
+        }
     }
 
     private string GetDialogue(Situation situation, int DialogueIndex, string PartnerName = null)
