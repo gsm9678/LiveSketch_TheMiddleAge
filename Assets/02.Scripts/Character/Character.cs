@@ -54,7 +54,7 @@ public class Character : MonoBehaviour
         {
             Debug.Log($"{characterName} :: EventDelay 이후 랜덤 목적지에 도착했습니다!");
             deltaTime = 0;
-            playerController.MoveTo();
+            playerController.MoveToRandom();
         }
     }
 
@@ -139,8 +139,8 @@ public class Character : MonoBehaviour
         partner.is_call = false;
         CharacterPriority = Random.Range(0f, 100f);
 
-        playerController.MoveTo();
-        partner.playerController.MoveTo();
+        playerController.MoveToRandom();
+        partner.playerController.MoveToRandom();
     }
     /// <summary>
     /// 재귀적으로 주고받는 대화 코루틴

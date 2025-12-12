@@ -1,88 +1,152 @@
-using System.Collections;
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
 public class PlayerController : MonoBehaviour
 {
+    [Header("Wander")]
     [SerializeField] private float moveSpeed = 5.0f;
-    [SerializeField] private float range = 40;
+    [SerializeField] private float range = 40f;
+
+    [Header("Start Option")]
+    [SerializeField] private bool autoWanderOnStart = true; // 기본 true (기존 동작 유지)
 
     private NavMeshAgent navMeshAgent;
     private Transform targetPos;
     private Vector3 point;
 
-    public Action action =  null;
+    // 기존: 도착하면 Character가 받는 콜백
+    public Action action = null;
+
+    // 지금 배회 중인지 여부
+    public bool IsWandering { get; private set; }
+
+    private Coroutine moveRoutine;
 
     private void Awake()
     {
         navMeshAgent = GetComponent<NavMeshAgent>();
-        targetPos = GetComponent<Transform>();
-    }
-    private void Start()
-    {
-        MoveTo();
+        targetPos = transform;
     }
 
-    public void MoveTo()
+    private void Start()
     {
-        // 기존에 이동 행동을 하고 있었다면 코루틴 중지
-        StopCoroutine("OnMove");
-        // 이동 속도 설정
+        if (autoWanderOnStart)
+            StartWander();
+    }
+
+    // 배회 시작 (랜덤 목적지 반복)
+    public void StartWander()
+    {
+        IsWandering = true;
+        SetCanUseStairs(false);   // 평소엔 계단 사용 금지
+        MoveToRandom();
+    }
+
+    // 배회 정지
+    public void StopWander()
+    {
+        IsWandering = false;
+        ResetMoveTo();
+    }
+
+    // 랜덤 목적지로 이동(배회용)
+    public void MoveToRandom()
+    {
+        if (!IsWandering) return;
+
         navMeshAgent.speed = moveSpeed;
-        // 목표지점 설정 (목표까지의 경로 계산 후 알아서 움직인다)
+        navMeshAgent.isStopped = false;
+
         if (RandomPoint(targetPos.position, range, out point))
         {
-            navMeshAgent.SetDestination(point);
+            MoveToPoint(point);
         }
-        // 이동 행동에 대한 코루틴 시작
-        StartCoroutine("OnMove");
+    }
+
+    // 특정 지점으로 단발 이동(연출용/지정 이동용)
+    public void MoveToPoint(Vector3 destination)
+    {
+        ResetMoveTo();
+
+        navMeshAgent.speed = moveSpeed;
+        navMeshAgent.isStopped = false;
+        navMeshAgent.SetDestination(destination);
+
+        moveRoutine = StartCoroutine(OnMove());
     }
 
     public void ResetMoveTo()
     {
-        navMeshAgent.ResetPath();
-        StopCoroutine("OnMove");
+        if (moveRoutine != null)
+        {
+            StopCoroutine(moveRoutine);
+            moveRoutine = null;
+        }
+
+        if (navMeshAgent != null)
+            navMeshAgent.ResetPath();
     }
 
-    IEnumerator OnMove()
+    private IEnumerator OnMove()
     {
         while (true)
         {
-            // 목표 위치(navMeshAgent.destination)와 내 위치(transform.position)의 거리가 0.1미만일 때
-            // 즉, 목표 위치에 거의 도착했을 때
-            if (Vector3.Distance(navMeshAgent.destination, transform.position) < 0.1f)
+            if (!navMeshAgent.pathPending)
             {
-                // 내 위치를 목표 위치로 설정
-                transform.position = navMeshAgent.destination;
-                // SetDestination()에 의해 설정된 경로를 초기화. 이동을 멈춘다
-                navMeshAgent.ResetPath();
-
-                if (action != null)
+                // NavMeshAgent.remainingDistance가 더 안정적
+                if (navMeshAgent.remainingDistance <= navMeshAgent.stoppingDistance + 0.05f)
                 {
-                    action?.Invoke();
+                    navMeshAgent.ResetPath();
+
+                    action?.Invoke(); // Character가 “도착” 이벤트 받음
+
+                    // 배회 모드일 때만 다음 랜덤 목적지로 반복
+                    if (IsWandering)
+                        MoveToRandom();
+
+                    moveRoutine = null;
+                    yield break;
                 }
-
-                MoveTo(); 
-
-                break;
             }
 
             yield return null;
         }
     }
 
-    bool RandomPoint(Vector3 center, float range, out Vector3 result)
+    private bool RandomPoint(Vector3 center, float range, out Vector3 result)
     {
-        while (true)
+        for (int i = 0; i < 30; i++)
         {
             Vector3 randomPoint = center + UnityEngine.Random.insideUnitSphere * range;
-            NavMeshHit hit;
-            if (NavMesh.SamplePosition(randomPoint, out hit, 1.0f, NavMesh.AllAreas))
+            if (NavMesh.SamplePosition(randomPoint, out NavMeshHit hit, 1.0f, NavMesh.AllAreas))
             {
                 result = hit.position;
                 return true;
             }
+        }
+
+        result = center;
+        return false;
+    }
+
+    public void SetCanUseStairs(bool canUse)
+    {
+        if (canUse)
+        {
+            // Walkable + Stairs
+            navMeshAgent.areaMask =
+                NavMesh.GetAreaFromName("Walkable") >= 0
+                ? (1 << NavMesh.GetAreaFromName("Walkable")) |
+                  (1 << NavMesh.GetAreaFromName("Stairs"))
+                : NavMesh.AllAreas;
+        }
+        else
+        {
+            // Walkable만
+            navMeshAgent.areaMask =
+                1 << NavMesh.GetAreaFromName("Walkable");
         }
     }
 }
