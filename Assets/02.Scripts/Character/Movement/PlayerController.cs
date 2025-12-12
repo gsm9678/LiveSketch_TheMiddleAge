@@ -61,7 +61,6 @@ public class PlayerController : MonoBehaviour
                 if (action != null)
                 {
                     action?.Invoke();
-                    break;
                 }
 
                 MoveTo(); 

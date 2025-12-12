@@ -1,51 +1,95 @@
 using System.Collections;
 using UnityEngine;
-using Febucci.TextAnimatorForUnity; // 3.x 네임스페이스
-                                    // (TypewriterComponent 여기에 있음)
+using DG.Tweening;
+using Febucci.TextAnimatorForUnity;
+using TMPro;
 
 public class SpeechBubble : MonoBehaviour
 {
-    [Header("Target to follow")]
-    public Transform target;
-    public Vector3 offset = new Vector3(0f, 2.2f, 0f);
+    [Header("References")]
+    public RectTransform bubbleRoot;
+    public RectTransform bodyRect;
+    public RectTransform tailRect;
+    public RectTransform textContainer;
+    public TextMeshProUGUI textMesh;
+    public CanvasGroup canvasGroup;
+    public TypewriterComponent typewriter;
 
-    [Header("Text Animator")]
-    [SerializeField] private TypewriterComponent typewriter;  // 인스펙터에 할당
-    [SerializeField] private float minDisplayTime = 0.5f;      // 문장 한 줄 유지 시간
+    [Header("Target")]
+    private Transform target;
+    public Vector3 offset = new Vector3(0, 2.2f, 0);
 
-    private void Awake()
-    {
-        // 혹시라도 동적으로 붙일 경우를 대비한 안전장치
-        if (typewriter == null)
-            typewriter = GetComponentInChildren<TypewriterComponent>();
-    }
+    [Header("Padding")]
+    public Vector2 padding = new Vector2(40, 30); // 말풍선 안쪽 여백
+
+    [Header("Tween")]
+    public float showTime = 0.25f;
+    public float hideTime = 0.2f;
 
     private void LateUpdate()
     {
         if (target != null)
         {
             transform.position = target.position + offset;
-            // 필요하면 카메라 방향으로 LookAt도 가능
-            // transform.forward = (transform.position - Camera.main.transform.position).normalized;
+
+            // Billboard
+            if (Camera.main != null)
+            {
+                transform.forward = -(Camera.main.transform.position - transform.position).normalized;
+            }
         }
+
+        // 자동 크기 조절
+        UpdateBubbleSize();
     }
 
-    /// <summary>
-    /// 한 줄 말하기 (타이핑 + 잠깐 유지)
-    /// </summary>
-    public IEnumerator PlayText(string message, float extraWait = 0.5f)
+    public void SetTarget(Transform newTarget)
     {
-        if (typewriter == null)
-        {
-            Debug.LogWarning("TypewriterComponent is missing on SpeechBubble.", this);
-            yield break;
-        }
+        target = newTarget;
+    }
 
-        // Text Animator 3.x 방식: ShowText 사용
+    // 텍스트 길이에 맞게 말풍선 크기 조절
+    void UpdateBubbleSize()
+    {
+        if (textContainer == null || bubbleRoot == null) return;
+
+        // TextMeshPro가 계산한 Preferred Size 가져오기
+        Vector2 preferred = new Vector2(textMesh.preferredWidth, textMesh.preferredHeight);
+
+        // TextContainer는 ContentSizeFitter에 의해 자동 조절됨 → bubbleRoot가 패딩만 더해 확장
+        bubbleRoot.sizeDelta = preferred + padding;
+    }
+
+    // 말풍선 등장
+    public IEnumerator ShowBubble()
+    {
+        canvasGroup.alpha = 0;
+        bubbleRoot.localScale = Vector3.zero;
+
+        Sequence seq = DOTween.Sequence();
+        seq.Join(canvasGroup.DOFade(1f, showTime));
+        seq.Join(bubbleRoot.DOScale(0.01f, showTime).SetEase(Ease.OutBack));
+
+        yield return seq.WaitForCompletion();
+    }
+
+    // 말풍선 숨김
+    public IEnumerator HideBubble()
+    {
+        Sequence seq = DOTween.Sequence();
+        seq.Join(canvasGroup.DOFade(0f, hideTime));
+        seq.Join(bubbleRoot.DOScale(0.005f, hideTime).SetEase(Ease.InBack));
+
+        yield return seq.WaitForCompletion();
+    }
+
+    // 텍스트 출력
+    public IEnumerator PlayLine(string message)
+    {
+        textMesh.text = message;
         typewriter.ShowText(message);
 
-        // 여기서는 단순히 "문장 길이에 비례한 시간 + 최소 시간" 정도로 대기
-        float estimatedTime = Mathf.Max(minDisplayTime, message.Length * 0.04f);
-        yield return new WaitForSeconds(estimatedTime + extraWait);
+        float waitTime = Mathf.Max(0.5f, message.Length * 0.04f);
+        yield return new WaitForSeconds(waitTime + 1f);
     }
 }

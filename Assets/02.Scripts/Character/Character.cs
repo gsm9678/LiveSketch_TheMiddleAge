@@ -9,14 +9,14 @@ public class Character : MonoBehaviour
     public float CharacterPriority = 0;
     [SerializeField] float EventDelay;
     private float deltaTime = 0;
+    [SerializeField] private float lookSpeed = 3f;
 
     [SerializeField] private PlayerController playerController;
 
-    private bool is_call = false;
+    public bool is_call = false;
 
     // 말풍선 참조
-    private SpeechBubble myBubble;
-    private SpeechBubble partnerBubble;
+    private SpeechBubble dialogueBubble;
 
     private void Start()
     {
@@ -64,17 +64,42 @@ public class Character : MonoBehaviour
         {
             if (!is_call && deltaTime >= EventDelay)
             {
-                deltaTime = 0;
-                playerController.ResetMoveTo();
 
                 Character otherChar = other.GetComponent<Character>();
 
                 if (otherChar != null &&
                     CharacterPriority > otherChar.CharacterPriority)
                 {
+                    deltaTime = 0;
+                    playerController.ResetMoveTo();
+                    otherChar.deltaTime = 0;
+                    otherChar.playerController.ResetMoveTo();
                     StartCoroutine(StartTalking(otherChar));
                 }
             }
+        }
+    }
+    private IEnumerator SmoothLookAt(Character target)
+    {
+        if (target == null) yield break;
+
+        Transform my = transform;
+        Transform other = target.transform;
+
+        // 목표 방향 계산
+        Vector3 targetDir = (other.position - my.position);
+        targetDir.y = 0f;
+
+        Quaternion startRot = my.rotation;
+        Quaternion targetRot = Quaternion.LookRotation(targetDir);
+
+        float t = 0f;
+
+        while (t < 1f)
+        {
+            t += Time.deltaTime * lookSpeed;
+            my.rotation = Quaternion.Slerp(startRot, targetRot, t);
+            yield return null;
         }
     }
 
@@ -87,61 +112,71 @@ public class Character : MonoBehaviour
         Situation situation = (Situation)(int)values.GetValue(random);
 
         is_call = true;
+        partner.is_call = true;
 
-        // 양쪽 캐릭터에 말풍선 생성
-        myBubble = BubbleManager.Instance.CreateBubble(transform);
-        partnerBubble = BubbleManager.Instance.CreateBubble(partner.transform);
+        StartCoroutine(SmoothLookAt(partner));
+        StartCoroutine(partner.SmoothLookAt(this));
 
-        yield return Talking(situation, 0, partner, partner.characterName);
 
-        // 대화 종료 처리
+        // 1) 말풍선 생성
+        dialogueBubble = BubbleManager.Instance.CreateDialogueBubble();
+
+        // 2) 말풍선 등장 애니메이션
+        dialogueBubble.SetTarget(transform);      // 일단 나를 타겟으로
+        yield return dialogueBubble.ShowBubble();
+
+        // 3) 본격 대화 시작 (bubble 공유)
+        yield return Talking(situation, 0, partner, partner.characterName, dialogueBubble);
+
+        // 4) 대화 종료 → 퇴장 애니메이션
+        yield return dialogueBubble.HideBubble();
+
+        // 5) 말풍선 삭제
+        Destroy(dialogueBubble.gameObject);
+        dialogueBubble = null;
+
         is_call = false;
+        partner.is_call = false;
         CharacterPriority = Random.Range(0f, 100f);
-
-        if (myBubble != null) Destroy(myBubble.gameObject);
-        if (partnerBubble != null) Destroy(partnerBubble.gameObject);
 
         playerController.MoveTo();
         partner.playerController.MoveTo();
-        yield return null;
     }
-
     /// <summary>
     /// 재귀적으로 주고받는 대화 코루틴
     /// </summary>
-    private IEnumerator Talking(Situation situation, int DialogueIndex, Character partner, string partnerName)
+
+    private IEnumerator Talking(
+    Situation situation,
+    int DialogueIndex,
+    Character partner,
+    string partnerName,
+    SpeechBubble bubble)
     {
         var lines = characterActData.DialogueDatas[situation];
         if (DialogueIndex >= lines.Length) yield break;
 
-        // 내 대사
         string msg = GetDialogue(situation, DialogueIndex, partnerName);
         Debug.Log(characterName + "\n" + msg);
 
-        if (myBubble != null)
-        {
-            // Text Animator 3.x 타입라이터로 말풍선 출력
-            yield return myBubble.PlayText(msg, 0.3f);
-        }
-        else
-        {
-            // 말풍선이 없으면 기존처럼 딜레이만 유지
-            yield return new WaitForSeconds(1f);
-        }
+        // 말하는 사람 쪽으로 버블 타겟 변경 + 한 줄 출력
+        bubble.SetTarget(transform);
+        yield return bubble.PlayLine(msg);
 
         DialogueIndex++;
 
-        // 상대 캐릭터에게 턴 넘기기
         if (partner != null)
         {
-            yield return partner.PartnerTalking(situation, DialogueIndex, this, characterName);
+            yield return partner.PartnerTalking(situation, DialogueIndex, this, characterName, bubble);
         }
     }
 
-    /// <summary>
-    /// 상대 캐릭터가 말하는 쪽 (같은 패턴, 말풍선만 partnerBubble 사용)
-    /// </summary>
-    public IEnumerator PartnerTalking(Situation situation, int DialogueIndex, Character partner, string partnerName)
+    public IEnumerator PartnerTalking(
+        Situation situation,
+        int DialogueIndex,
+        Character partner,
+        string partnerName,
+        SpeechBubble bubble)
     {
         var lines = characterActData.DialogueDatas[situation];
         if (DialogueIndex >= lines.Length) yield break;
@@ -149,20 +184,14 @@ public class Character : MonoBehaviour
         string msg = GetDialogue(situation, DialogueIndex, partnerName);
         Debug.Log(characterName + "\n" + msg);
 
-        if (partnerBubble != null)
-        {
-            yield return partnerBubble.PlayText(msg, 0.3f);
-        }
-        else
-        {
-            yield return new WaitForSeconds(1f);
-        }
+        bubble.SetTarget(transform);
+        yield return bubble.PlayLine(msg);
 
         DialogueIndex++;
 
         if (partner != null)
         {
-            yield return partner.Talking(situation, DialogueIndex, this, characterName);
+            yield return partner.Talking(situation, DialogueIndex, this, characterName, bubble);
         }
     }
 
