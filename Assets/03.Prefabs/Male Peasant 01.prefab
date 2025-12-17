@@ -395,7 +395,7 @@ GameObject:
   - component: {fileID: 2677220225875347443}
   - component: {fileID: 9125541906675163856}
   m_Layer: 0
-  m_Name: Sample 01
+  m_Name: Male Peasant 01
   m_TagString: Character
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -431,7 +431,7 @@ Animator:
   m_GameObject: {fileID: 2185760272537025324}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: f6605568d3cd20e4db1a0b19cfe83787, type: 3}
-  m_Controller: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 3bb24ae9e7a90cc4badcfb074957b299, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 1
@@ -458,9 +458,25 @@ MonoBehaviour:
   characterName: 
   characterActData: {fileID: 0}
   CharacterPriority: 0
-  EventDelay: 10
+  EventDelay: 15
   lookSpeed: 3
   playerController: {fileID: 1315387513895404161}
+  autoStartWander: 0
+  animator: {fileID: 7815333119613030697}
+  helloTriggerName: Hello
+  helloDuration: 5
+  arriveParticlePrefabs:
+  - {fileID: 19886694, guid: 69359de5f8759454bbfe449e619129bc, type: 3}
+  - {fileID: 19843530, guid: 4f1ebd70022acf5478ef1322469c7ca8, type: 3}
+  - {fileID: 19845558, guid: 4a9bb31a555add44ba9d0dbc0c220e70, type: 3}
+  - {fileID: 19878724, guid: 3a1dd40f2c911e541afb98fc9829ec06, type: 3}
+  - {fileID: 19846574, guid: 92cf35f623d72fc448f4d0661c9284f5, type: 3}
+  - {fileID: 19881592, guid: 1ff355f4b9d78ce4eb64b57ffef36acc, type: 3}
+  - {fileID: 198025331340225194, guid: 10ee181f684c0eb46b46b1bc2549b25a, type: 3}
+  - {fileID: 19881692, guid: ab519ef83513b594cad24b0df6fc5d72, type: 3}
+  - {fileID: 198787522950424574, guid: ab9041fcf0d2ca5429b835df2786ef1e, type: 3}
+  - {fileID: 198116720822770072, guid: e74f011ec89ded74aaac3cefd05cdc61, type: 3}
+  particleOffset: {x: 0, y: 2.5, z: 0}
   is_call: 0
 --- !u!114 &1315387513895404161
 MonoBehaviour:
@@ -476,7 +492,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   moveSpeed: 1
   range: 40
+  minWait: 1.5
+  maxWait: 4
   autoWanderOnStart: 0
+  allowStairsInWander: 0
+  warpRadius: 3
+  destProjectRadius: 2.5
+  arriveEpsilon: 0.1
+  randomTries: 40
+  animator: {fileID: 7815333119613030697}
+  walkBoolName: isWalking
+  animationLocked: 0
 --- !u!54 &5155425194075116866
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -500,7 +526,7 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 0
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
@@ -523,10 +549,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.68
+  m_Radius: 0.83
   m_Height: 2
   m_Direction: 1
-  m_Center: {x: 0, y: 0.73, z: 0}
+  m_Center: {x: 0, y: 0.95, z: 0}
 --- !u!195 &9125541906675163856
 NavMeshAgent:
   m_ObjectHideFlags: 0
