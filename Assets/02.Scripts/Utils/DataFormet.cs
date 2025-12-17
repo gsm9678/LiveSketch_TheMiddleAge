@@ -11,7 +11,12 @@ public struct CharacterData
 
 public enum Situation { OneSelf, Hello, Talk1, Talk2 }
 public enum TalkSituation { Talk1 = Situation.Talk1, Talk2 = Situation.Talk2 }
-
+public enum MoveState
+{
+    Idle,
+    Wander,
+    Scripted
+}
 #region Sensor
 public class SensorDataFormat
 {

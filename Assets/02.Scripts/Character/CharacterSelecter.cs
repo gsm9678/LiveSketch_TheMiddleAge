@@ -4,6 +4,7 @@ public class CharacterSelecter : MonoBehaviour
 {
     [Header("생성할 캐릭터 설정")]
     [SerializeField] CharacterData[] Characters;
+    [SerializeField] EntranceSequence EntranceSequence;
 
     private void Start()
     {
@@ -27,7 +28,7 @@ public class CharacterSelecter : MonoBehaviour
                 break;
             }
         }
+        EntranceSequence.Play(go);
 
-        Instantiate(go, this.transform);
     }
 }

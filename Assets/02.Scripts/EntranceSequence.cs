@@ -7,75 +7,84 @@ public class EntranceSequence : MonoBehaviour
 {
     [Header("Spawn")]
     [SerializeField] private GameObject characterPrefab;
-    [SerializeField] private Transform spawnPointInside;     // 문 뒤(실내)
-    [SerializeField] private Transform stairBottomPoint;     // 계단 아래(바깥)
+    [SerializeField] private Transform spawnPointInside;   // 문 뒤(계단일 수도 있음)
+    [SerializeField] private Transform stairBottomPoint;   // 계단 아래
 
     [Header("Door")]
-    [SerializeField] private Interactive doorInteractive;    // 네 Interactive(문) 넣기
-    [SerializeField] private float openDelay = 0.15f;
+    [SerializeField] private Interactive doorInteractive;
+    [SerializeField] private float doorOpenDelay = 0.2f;
 
-    [Header("Timing")]
-    [SerializeField] private float arriveDistance = 0.5f;
-    [SerializeField] private float timeout = 12f;
+    [Header("After")]
+    [SerializeField] private bool allowStairsInWander = false; // 평소 배회: 계단 금지
 
-    private void Start()
+
+    public void Play(GameObject go)
     {
-        Play();
-    }
-    public void Play()
-    {
+        characterPrefab = go;
         StartCoroutine(CoPlay());
     }
 
     private IEnumerator CoPlay()
     {
-        // 1) 스폰
         GameObject go = Instantiate(characterPrefab, spawnPointInside.position, spawnPointInside.rotation);
 
-        // 2) 컴포넌트 가져오기
         var pc = go.GetComponent<PlayerController>();
-        var agent = go.GetComponent<NavMeshAgent>();
+        var ch = go.GetComponent<Character>();
 
-        if (pc == null || agent == null)
+        ch.is_call = true;
+        if (pc == null || ch == null)
         {
-            Debug.LogError("[EntranceSequence] Spawned character needs PlayerController + NavMeshAgent.");
+            Debug.LogError("[EntranceSequence] Prefab needs PlayerController + Character.");
             yield break;
         }
 
-        // 3) 배회 끄기 (스폰 즉시 돌아다니는 것 방지)
-        pc.StopWander();
+        // (핵심) 스폰 즉시 Character가 자동배회 시작해서 Walkable로 튕기는 것 방지
+        ch.SetAutoStartWander(false);
 
+        // 연출 시작: Idle 고정 + 계단 허용
+        pc.EnterIdle();
         pc.SetCanUseStairs(true);
 
-        // 4) 문 열기
+        // 한 프레임 기다려 NavMesh/Agent 안정화
+        yield return null;
+
+        // 문 열기
         if (doorInteractive != null)
         {
-            yield return new WaitForSeconds(openDelay);
-            doorInteractive.PlayInteractiveAnimation(); // openAnimationName 재생
+            yield return new WaitForSeconds(doorOpenDelay);
+            doorInteractive.PlayInteractiveAnimation();
         }
 
-        // 5) 계단 아래로 단발 이동
-        pc.MoveToPoint(stairBottomPoint.position);
+        // 계단 아래 목적지를 NavMesh 위로 보정
+        Vector3 raw = stairBottomPoint.position;
+        Vector3 dest = raw;
 
-        // 6) 도착 대기 (타임아웃 포함)
-        float t = 0f;
-        while (t < timeout)
-        {
-            t += Time.deltaTime;
+        // 여기서는 계단 포함 AllAreas로 보정해도 OK (우리는 계단을 허용한 상태)
+        if (NavMesh.SamplePosition(raw, out var hit, 2.5f, NavMesh.AllAreas))
+            dest = hit.position;
 
-            float dist = Vector3.Distance(go.transform.position, stairBottomPoint.position);
-            if (dist <= arriveDistance)
-                break;
+        // 계단 아래까지 Scripted 이동 (계단 허용)
+        pc.EnterScriptedMove(dest, allowStairs: true);
 
-            yield return null;
-        }
+        // 도착 대기
+        bool arrived = false;
+        void OnArrived() => arrived = true;
+        pc.Arrived += OnArrived;
+
+        yield return new WaitUntil(() => arrived);
+
         if (doorInteractive != null)
         {
-            doorInteractive.PlayInteractiveAnimation(); // openAnimationName 재생
+            doorInteractive.PlayInteractiveAnimation();
         }
 
-        pc.SetCanUseStairs(false);
-        // 7) 배회 시작
-        pc.StartWander();
+        pc.Arrived -= OnArrived;
+
+        // 도착 후 5초 인사(애니 bool + 말풍선)
+        yield return StartCoroutine(ch.PlayHelloEvent());
+
+        ch.is_call = false;
+        // 인사 끝나면 배회 전환(계단 금지)
+        pc.EnterAutoWanderSafely(allowStairsInWander);
     }
 }

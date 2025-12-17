@@ -2,208 +2,267 @@ using System.Collections;
 using UnityEngine;
 using RandomCharacterData;
 
+[RequireComponent(typeof(PlayerController))]
 public class Character : MonoBehaviour
 {
-    public string characterName = null;
-    public CharacterActData characterActData = null;
-    public float CharacterPriority = 0;
-    [SerializeField] float EventDelay;
-    private float deltaTime = 0;
+    [Header("Identity")]
+    public string characterName;
+    public CharacterActData characterActData;
+    public float CharacterPriority;
+
+    [Header("Event")]
+    [SerializeField] private float EventDelay = 2f;
+    private float deltaTime;
+
+    [Header("Look")]
     [SerializeField] private float lookSpeed = 3f;
 
+    [Header("Refs")]
     [SerializeField] private PlayerController playerController;
+
+    [Header("Auto Start Wander")]
+    [SerializeField] private bool autoStartWander = true; // EntranceSequence 스폰은 false로 막을 것
+
+    [Header("Greeting Animation (bool)")]
+    [SerializeField] private Animator animator;
+    [SerializeField] private string helloTriggerName = "Hello";
+    [SerializeField] private float helloDuration = 5f;
+
+    [Header("Arrive Particle")]
+    [SerializeField] private ParticleSystem[] arriveParticlePrefabs;
+    [SerializeField] private Vector3 particleOffset = new Vector3(0f, 2.0f, 0f);
 
     public bool is_call = false;
 
-    // 말풍선 참조
     private SpeechBubble dialogueBubble;
+
+    public void SetAutoStartWander(bool enabled) => autoStartWander = enabled;
+
+    private void Awake()
+    {
+        if (playerController == null)
+            playerController = GetComponent<PlayerController>();
+
+        if (animator == null)
+            animator = GetComponentInChildren<Animator>();
+    }
 
     private void Start()
     {
-        if (characterName == "")
-        {
+        if (string.IsNullOrEmpty(characterName))
             characterName = RandomNameGenerator.GenerateRandomName();
-        }
+
         if (characterActData == null)
-        {
             characterActData = RandomCharacterActData.GetRandomCharacterActData();
-        }
-        if (playerController == null)
-        {
-            playerController = gameObject.AddComponent<PlayerController>();
-        }
-        Debug.Log(GetDialogue(Situation.Hello, 0));
 
         CharacterPriority = Random.Range(0f, 100f);
-        deltaTime = EventDelay;
+        deltaTime = 0;
 
-        playerController.action += OnArrivedToDestination;
+        playerController.Arrived += OnArrivedToDestination;
+
+        // 미리 배치된 캐릭터는 자동 배회 진입
+        if (autoStartWander)
+            playerController.EnterAutoWanderSafely(allowStairs: false);
+    }
+
+    private void OnDestroy()
+    {
+        if (playerController != null)
+            playerController.Arrived -= OnArrivedToDestination;
     }
 
     private void Update()
     {
         if (deltaTime < EventDelay)
-        {
             deltaTime += Time.deltaTime;
-        }
     }
 
     private void OnArrivedToDestination()
     {
         if (deltaTime >= EventDelay)
         {
-            Debug.Log($"{characterName} :: EventDelay 이후 랜덤 목적지에 도착했습니다!");
             deltaTime = 0;
-            playerController.MoveToRandom();
+
+            PlayArriveParticle();
         }
+    }
+    public void PlayArriveParticlePublic()
+    {
+        deltaTime = 0;
+        PlayArriveParticle();
+    }
+    private void PlayArriveParticle()
+    {
+        if (arriveParticlePrefabs == null || arriveParticlePrefabs.Length == 0)
+            return;
+
+        // 랜덤 파티클 선택
+        ParticleSystem prefab =
+            arriveParticlePrefabs[Random.Range(0, arriveParticlePrefabs.Length)];
+
+        if (prefab == null) return;
+
+        Vector3 spawnPos = transform.position + particleOffset;
+
+        ParticleSystem ps = Instantiate(
+            prefab,
+            spawnPos,
+            Quaternion.identity
+        );
+
+        // 캐릭터를 따라가게 하고 싶으면 부모 설정
+        ps.transform.SetParent(transform);
+
+        ps.Play();
+
+        // 파티클 종료 후 자동 제거
+        float lifeTime =
+            ps.main.duration +
+            ps.main.startLifetime.constantMax;
+
+        Destroy(ps.gameObject, lifeTime);
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Character"))
-        {
-            if (!is_call && deltaTime >= EventDelay)
-            {
+        if (!other.CompareTag("Character")) return;
+        if (is_call) return;
+        if (deltaTime < EventDelay) return;
 
-                Character otherChar = other.GetComponent<Character>();
+        Character otherChar = other.GetComponent<Character>();
+        if (otherChar == null) return;
+        if (otherChar.is_call) return;
 
-                if (otherChar != null &&
-                    CharacterPriority > otherChar.CharacterPriority)
-                {
-                    deltaTime = 0;
-                    playerController.ResetMoveTo();
-                    otherChar.deltaTime = 0;
-                    otherChar.playerController.ResetMoveTo();
-                    StartCoroutine(StartTalking(otherChar));
-                }
-            }
-        }
-    }
-    private IEnumerator SmoothLookAt(Character target)
-    {
-        if (target == null) yield break;
-
-        Transform my = transform;
-        Transform other = target.transform;
-
-        // 목표 방향 계산
-        Vector3 targetDir = (other.position - my.position);
-        targetDir.y = 0f;
-
-        Quaternion startRot = my.rotation;
-        Quaternion targetRot = Quaternion.LookRotation(targetDir);
-
-        float t = 0f;
-
-        while (t < 1f)
-        {
-            t += Time.deltaTime * lookSpeed;
-            my.rotation = Quaternion.Slerp(startRot, targetRot, t);
-            yield return null;
-        }
-    }
-
-    //  여기서부터 말풍선 + 대화 시작
-    public IEnumerator StartTalking(Character partner)
-    {
-        var values = System.Enum.GetValues(typeof(TalkSituation));
-        int random = Random.Range(0, values.Length);
-
-        Situation situation = (Situation)(int)values.GetValue(random);
+        if (CharacterPriority <= otherChar.CharacterPriority) return;
 
         is_call = true;
-        partner.is_call = true;
+        otherChar.is_call = true;
 
+        deltaTime = 0;
+        otherChar.deltaTime = 0;
+
+        playerController.EnterIdle();
+        otherChar.playerController.EnterIdle();
+
+        StartCoroutine(StartTalking(otherChar));
+    }
+
+    public IEnumerator PlayHelloEvent()
+    {
+        playerController.EnterIdle();
+        playerController.animationLocked = true;
+        is_call = true;
+
+        if (animator != null)
+            animator.SetTrigger(helloTriggerName);
+
+        SpeechBubble bubble = BubbleManager.Instance.CreateDialogueBubble();
+        bubble.SetTarget(transform);
+
+        yield return bubble.ShowBubble();
+
+        string msg = GetDialogue(Situation.Hello, 0, null);
+        yield return bubble.PlayLine(msg);
+
+        yield return new WaitForSeconds(helloDuration);
+
+        yield return bubble.HideBubble();
+        Destroy(bubble.gameObject);
+
+        playerController.animationLocked = false;
+        is_call = false;
+    }
+
+    private IEnumerator StartTalking(Character partner)
+    {
         StartCoroutine(SmoothLookAt(partner));
         StartCoroutine(partner.SmoothLookAt(this));
 
+        var values = System.Enum.GetValues(typeof(TalkSituation));
+        Situation situation = (Situation)values.GetValue(Random.Range(0, values.Length));
 
-        // 1) 말풍선 생성
         dialogueBubble = BubbleManager.Instance.CreateDialogueBubble();
-
-        // 2) 말풍선 등장 애니메이션
-        dialogueBubble.SetTarget(transform);      // 일단 나를 타겟으로
+        dialogueBubble.SetTarget(transform);
         yield return dialogueBubble.ShowBubble();
 
-        // 3) 본격 대화 시작 (bubble 공유)
         yield return Talking(situation, 0, partner, partner.characterName, dialogueBubble);
 
-        // 4) 대화 종료 → 퇴장 애니메이션
         yield return dialogueBubble.HideBubble();
 
-        // 5) 말풍선 삭제
         Destroy(dialogueBubble.gameObject);
         dialogueBubble = null;
 
         is_call = false;
         partner.is_call = false;
+
         CharacterPriority = Random.Range(0f, 100f);
+        partner.CharacterPriority = Random.Range(0f, 100f);
 
-        playerController.MoveToRandom();
-        partner.playerController.MoveToRandom();
+        playerController.EnterAutoWanderSafely(false);
+        partner.playerController.EnterAutoWanderSafely(false);
     }
-    /// <summary>
-    /// 재귀적으로 주고받는 대화 코루틴
-    /// </summary>
 
-    private IEnumerator Talking(
-    Situation situation,
-    int DialogueIndex,
-    Character partner,
-    string partnerName,
-    SpeechBubble bubble)
+    private IEnumerator SmoothLookAt(Character target)
     {
-        var lines = characterActData.DialogueDatas[situation];
-        if (DialogueIndex >= lines.Length) yield break;
+        if (target == null) yield break;
 
-        string msg = GetDialogue(situation, DialogueIndex, partnerName);
-        Debug.Log(characterName + "\n" + msg);
+        Vector3 dir = (target.transform.position - transform.position);
+        dir.y = 0f;
 
-        // 말하는 사람 쪽으로 버블 타겟 변경 + 한 줄 출력
-        bubble.SetTarget(transform);
-        yield return bubble.PlayLine(msg);
+        Quaternion start = transform.rotation;
+        Quaternion targetRot = Quaternion.LookRotation(dir);
 
-        DialogueIndex++;
-
-        if (partner != null)
+        float t = 0f;
+        while (t < 1f)
         {
-            yield return partner.PartnerTalking(situation, DialogueIndex, this, characterName, bubble);
+            t += Time.deltaTime * lookSpeed;
+            transform.rotation = Quaternion.Slerp(start, targetRot, t);
+            yield return null;
         }
     }
 
-    public IEnumerator PartnerTalking(
-        Situation situation,
-        int DialogueIndex,
-        Character partner,
-        string partnerName,
-        SpeechBubble bubble)
+    private IEnumerator Talking(Situation situation, int index, Character partner, string partnerName, SpeechBubble bubble)
     {
         var lines = characterActData.DialogueDatas[situation];
-        if (DialogueIndex >= lines.Length) yield break;
+        if (index >= lines.Length) yield break;
 
-        string msg = GetDialogue(situation, DialogueIndex, partnerName);
-        Debug.Log(characterName + "\n" + msg);
+        string msg = GetDialogue(situation, index, partnerName);
 
         bubble.SetTarget(transform);
         yield return bubble.PlayLine(msg);
 
-        DialogueIndex++;
+        index++;
 
         if (partner != null)
-        {
-            yield return partner.Talking(situation, DialogueIndex, this, characterName, bubble);
-        }
+            yield return partner.PartnerTalking(situation, index, this, characterName, bubble);
     }
 
-    private string GetDialogue(Situation situation, int DialogueIndex, string PartnerName = null)
+    public IEnumerator PartnerTalking(Situation situation, int index, Character partner, string partnerName, SpeechBubble bubble)
     {
-        string returnString = characterActData.DialogueDatas[situation][DialogueIndex];
+        var lines = characterActData.DialogueDatas[situation];
+        if (index >= lines.Length) yield break;
 
-        if (returnString.Contains("(MyName)"))
-            returnString = returnString.Replace("(MyName)", characterName);
-        else if (returnString.Contains("(TargetName)"))
-            returnString = returnString.Replace("(TargetName)", PartnerName);
+        string msg = GetDialogue(situation, index, partnerName);
 
-        return returnString;
+        bubble.SetTarget(transform);
+        yield return bubble.PlayLine(msg);
+
+        index++;
+
+        if (partner != null)
+            yield return partner.Talking(situation, index, this, characterName, bubble);
+    }
+
+    private string GetDialogue(Situation situation, int index, string partnerName)
+    {
+        string text = characterActData.DialogueDatas[situation][index];
+
+        if (text.Contains("(MyName)"))
+            text = text.Replace("(MyName)", characterName);
+
+        if (text.Contains("(TargetName)"))
+            text = text.Replace("(TargetName)", partnerName);
+
+        return text;
     }
 }
