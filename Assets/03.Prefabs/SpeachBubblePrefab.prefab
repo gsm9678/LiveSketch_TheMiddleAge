@@ -172,7 +172,7 @@ MonoBehaviour:
   textMesh: {fileID: 5268498946306918149}
   canvasGroup: {fileID: 6435631877690338168}
   typewriter: {fileID: 2340876008477196726}
-  offset: {x: 0, y: 2.2, z: 0}
+  offset: {x: 0, y: 2.5, z: 0}
   padding: {x: 0, y: 0}
   showTime: 0.25
   hideTime: 0.2
@@ -358,7 +358,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: New Text
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 681634118a52821409ae493da13e24fb, type: 2}
   m_sharedMaterial: {fileID: -560128914510627407, guid: 681634118a52821409ae493da13e24fb, type: 2}
